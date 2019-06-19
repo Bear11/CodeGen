@@ -1,0 +1,46 @@
+<idea-plugin>
+  <id>com.zcc.codergen</id>
+  <name>ApiToDto</name>
+  <version>1.0</version>
+  <vendor email="17301742758@163.com" url="http://www.ctrip.com">Ctrip</vendor>
+
+  <description>This is a plugin for developers to translate api to controller only for ctrip now</description>
+
+  <change-notes>
+    This is the frist edition for the plugin i created.
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="173.0"/>
+
+  <version>1.1</version>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+    <!--申报服务-->
+    <applicationService serviceInterface="com.zcc.codergen.CodeGenSettings"
+                        serviceImplementation="com.zcc.codergen.CodeGenSettings"/>
+   <!-- <applicationConfigurable instance="com.zcc.codergen.ui.CodeGenConfigurable"/>-->
+<!--    <themeProvider id="26ed3343-884c-4f49-87ca-279e7b4ecbc4"-->
+<!--                   path="/com/zcc/codergen/ui/CodeGenConfiguration.theme.json"/>-->
+  </extensions>
+
+  <actions>
+    <group id="com.zcc.apitodto.action.CodeMakerMenu" text="Sample Menu" description="Sample menu">
+      <add-to-group group-id="MainMenu" anchor="last"/>
+      <action id="com.zcc.apitodto.action.CodeMakerAction" class="com.zcc.codergen.action.CodeMakerAction" text="APi-To-Dto" description="api to dto" />
+    </group>
+  </actions>
+  <!-- 配置应用包以及应用包的实现类-->
+  <application-components>
+    <component>
+      <implementation-class>com.zcc.codergen.CodeGen</implementation-class>
+    </component>
+  </application-components>
+</idea-plugin>
