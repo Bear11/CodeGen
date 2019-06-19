@@ -57,7 +57,6 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         if (project == null) {
             return;
         }
-
         // 获取数据上下文
         //DataContext dataContext = anActionEvent.getDataContext();
 

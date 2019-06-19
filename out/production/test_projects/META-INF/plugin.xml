@@ -27,8 +27,8 @@
     <applicationService serviceInterface="com.zcc.codergen.CodeGenSettings"
                         serviceImplementation="com.zcc.codergen.CodeGenSettings"/>
    <!-- <applicationConfigurable instance="com.zcc.codergen.ui.CodeGenConfigurable"/>-->
-    <themeProvider id="26ed3343-884c-4f49-87ca-279e7b4ecbc4"
-                   path="/com/zcc/codergen/ui/CodeGenConfiguration.theme.json"/>
+<!--    <themeProvider id="26ed3343-884c-4f49-87ca-279e7b4ecbc4"-->
+<!--                   path="/com/zcc/codergen/ui/CodeGenConfiguration.theme.json"/>-->
   </extensions>
 
   <actions>
