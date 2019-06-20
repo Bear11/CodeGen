@@ -30,7 +30,7 @@ public class CodeGenSettings implements PersistentStateComponent<CodeGenSettings
     public CodeGenSettings() {
     }
 
-    private void loadDefaultSettings() {
+    public void loadDefaultSettings() {
         try {
             Map<String, CodeTemplate> codeTemplates = new HashMap<>();
             codeTemplates.put("Model",

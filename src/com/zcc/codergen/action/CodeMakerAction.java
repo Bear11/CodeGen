@@ -23,11 +23,13 @@ import com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackages
 import com.zcc.codergen.CodeGen;
 import com.zcc.codergen.CodeGenSettings;
 import com.zcc.codergen.CreateFileAction;
+import com.zcc.codergen.ui.CodeGenForm;
 import com.zcc.codergen.util.*;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,6 +59,18 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         if (project == null) {
             return;
         }
+
+        JFrame jFrame= new JFrame("CodeGenFrame");
+        JPanel rootPane=new CodeGenForm().getMainPane();
+        //CodeGenForm dialog = new CodeGenForm();
+        jFrame.setContentPane(rootPane);
+        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jFrame.pack();
+        jFrame.setSize(600, 200);
+        jFrame.setLocationRelativeTo(rootPane);//居中
+        jFrame.setVisible(true);
+
+
         // 获取数据上下文
         //DataContext dataContext = anActionEvent.getDataContext();
 

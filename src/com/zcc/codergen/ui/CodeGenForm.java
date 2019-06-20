@@ -1,5 +1,7 @@
 package com.zcc.codergen.ui;
 
+import com.zcc.codergen.CodeGenSettings;
+
 import javax.swing.*;
 import java.awt.event.*;
 
@@ -44,6 +46,9 @@ public class CodeGenForm extends JDialog {
 
     private void onOK() {
         // add your code here
+        // 初始化CodeGenSettings,初始化模型
+        CodeGenSettings settings = new CodeGenSettings();
+        settings.loadDefaultSettings();
         String path = classPath.getText();
 
         dispose();
@@ -54,11 +59,26 @@ public class CodeGenForm extends JDialog {
         dispose();
     }
 
-    public static void main(String[] args) {
-        CodeGenForm dialog = new CodeGenForm();
-        dialog.pack();
-        dialog.setVisible(true);
-        //dialog.setLocationRelativeTo();
-        System.exit(0);
+   /* public static void main(String[] args) {
+
+        JFrame jFrame= new JFrame("CodeGenFrame");
+        JPanel rootPane=new CodeGenForm().contentPane;
+        //CodeGenForm dialog = new CodeGenForm();
+        jFrame.setContentPane(rootPane);
+        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jFrame.pack();
+        jFrame.setSize(600, 200);
+        jFrame.setLocationRelativeTo(rootPane);//居中
+        jFrame.setVisible(true);
+
+//        CodeGenForm dialog = new CodeGenForm();
+//        dialog.pack();
+//        dialog.setVisible(true);
+//        dialog.setSize(800, 250);
+//        dialog.setLocationRelativeTo(rootPane);//居中
+    }
+*/
+    public JPanel getMainPane() {
+        return contentPane;
     }
 }
