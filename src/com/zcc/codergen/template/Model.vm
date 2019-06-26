@@ -32,21 +32,46 @@
 ##          - returnType: the method returnType
 ##          - params: the method params, like "(String name)"#
 ########################################################################################
-package $class0.PackageName;
+#macro (cap $strIn)$strIn.valueOf($strIn.charAt(0)).toUpperCase()$strIn.substring(1)#end
+package $class.PackageName;
 
-#foreach($importer in $class0.ImportList)
+#foreach($importer in $class.ImportList)
 import $importer;
 #end
 
 /**
- * create by @author $USER in $TIME
+ * create by $USER in $TIME
  */
-class $ClassName {
+public class $ClassName {
 
-#foreach($field in $class0.Fields)
-
-    private $field.Type $field.Name;
-
+#foreach($field in $class.Fields)
+    $field.modifier $field.Type $field.Name;
 #end
-
+ /**
+  * getter and setter functions
+  */
+#foreach($field in $class.Fields)
+  public ##
+#if($field.modifierStatic)
+static ##
+#end
+$field.type ##
+#set($name = $StringUtil.capitalizeWithJavaBeanConvention($StringUtil.sanitizeJavaIdentifier($helper.getPropertyName($field, $project))))
+#if ($field.boolean && $field.primitive)
+is##
+#else
+get##
+#end
+#cap($field.Name)() {
+  return $field.name;
+}
+  public ##
+#if($field.modifierStatic)
+static ##
+#end
+void ##
+set#cap($field.Name)($field.type $field.name) {
+   this.$field.name = $field.name;
+}
+#end
 }

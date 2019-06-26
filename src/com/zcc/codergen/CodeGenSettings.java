@@ -35,7 +35,7 @@ public class CodeGenSettings implements PersistentStateComponent<CodeGenSettings
             Map<String, CodeTemplate> codeTemplates = new HashMap<>();
             codeTemplates.put("Model",
                     createCodeTemplate("Model.vm",
-                            "${class0.className}Model", 1, CodeTemplate.DEFAULT_ENCODING));
+                            "Model", 1, CodeTemplate.DEFAULT_ENCODING));
             this.codeTemplates = codeTemplates;
         } catch (Exception e) {
             LOGGER.error("loadDefaultSettings failed", e);

@@ -12,6 +12,8 @@ import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.JavaProjectRootsUtil;
 import com.intellij.openapi.ui.Messages;
+import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -31,6 +33,8 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +68,13 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             return;
         }
         // 开启窗体
-        JFrame jFrame= new JFrame("CodeGenFrame");
+        CodeGenForm dialog = new CodeGenForm();
+        dialog.pack();
+        dialog.setSize(600,200);
+        JPanel rootPane = dialog.getMainPane();
+        dialog.setLocationRelativeTo(rootPane);
+        dialog.setVisible(true);
+       /* JFrame jFrame= new JFrame("CodeGenFrame");
         JPanel rootPane=new CodeGenForm().getMainPane();
         //CodeGenForm dialog = new CodeGenForm();
         jFrame.setContentPane(rootPane);
@@ -72,9 +82,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         jFrame.pack();
         jFrame.setSize(600, 200);
         jFrame.setLocationRelativeTo(rootPane);//居中
-        jFrame.setVisible(true);
-        CodeTemplate codeTemplate = settings.getCodeTemplate(templateKey);
-        System.out.println(calssPath);
+        jFrame.setVisible(true);*/
 
         // 获取数据上下文
         //DataContext dataContext = anActionEvent.getDataContext();
@@ -90,10 +98,10 @@ public class CodeMakerAction extends AnAction implements DumbAware {
 
         String url = anActionEvent.getPlace();
         // 获得的全限定类名
-        String classQualifiedName = "com.zcc.entry.People";
+        String classQualifiedName = "com.zcc.entry.Student";
 
         // 实际短类名
-        //String className = getRealClassName(classQualifiedName);
+        String classSourceName = getRealClassName(classQualifiedName);
 
         // 根据类的全限定名查询PsiClass，下面这个方法是查询Project域
         PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName, GlobalSearchScope.projectScope(project));
@@ -110,30 +118,41 @@ public class CodeMakerAction extends AnAction implements DumbAware {
 
         // PsiPackage psiPackage = JavaPsiFacade.getInstance(project).findPackage(classQualifiedName);
         String pakagename = "com.zcc.entry";
+        String pakagePath = pakagename.replace(".","/");
         String suffix = "Dto";
+        String targetClassName = classSourceName+suffix;
         ClassEntry currentClass = ClassEntry.create(psiClass, pakagename, suffix);
+
+        VirtualFile sourceRoot = findSourceRoot(currentClass, project, psiClass.getContainingFile());
+        CodeTemplate codeTemplate = null;
+        try {
+            //InputStream in = this.getClass().getResourceAsStream("../../template/" + "Model.vm");
+            // 从整个class文件夹去找
+            InputStream in = this.getClass().getResourceAsStream( "../template/" + "Model.vm");
+            String velocityTemplate = FileUtil.loadTextAndClose(in);
+            codeTemplate = createCodeTemplate(velocityTemplate,"Model.vm",
+                    targetClassName, 1, CodeTemplate.DEFAULT_ENCODING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         try {
             Map<String, Object> map = new HashMap<>();
-            //map.put("class" , selectClasses.get(i));
             Date now = new Date();
             map.put("class", currentClass);
             map.put("YEAR", DateFormatUtils.format(now, "yyyy"));
             map.put("TIME", DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
             map.put("USER", System.getProperty("user.name"));
-            String className = VelocityUtil.evaluate(codeTemplate.getClassNameVm(), map);
-            map.put("ClassName", className);
+            //String className = VelocityUtil.evaluate(codeTemplate.getClassNameVm(), map);
+            map.put("ClassName", targetClassName);
 
             String content = VelocityUtil.evaluate(codeTemplate.getCodeTemplate(), map);
-            //ClassEntry currentClass = selectClasses.get(0);
-            VirtualFile sourceRoot = findSourceRoot(currentClass, project, psiClass.getContainingFile());
 
             if (sourceRoot != null) {
                 String sourcePath = sourceRoot.getPath() + "/" + currentClass.getPackageName().replace(".", "/");
-                String targetPath = CodeGenUtil.generateClassPath(sourcePath, className, "java");
+                String targetPath = CodeGenUtil.generateClassPath(sourcePath, targetClassName, "java");
 
-
-                //VelocityInfoOp.generatorCode("model.vm", map, sourcePath + table.getPackagePath() + "/model", table.getClassName() + ".java");
+                //VelocityInfoOp.generatorCode("model.vm", map, sourcePath + pakagePath, targetClassName+ ".java");
 
                 VirtualFileManager manager = VirtualFileManager.getInstance();
                 VirtualFile virtualFile = manager
@@ -145,77 +164,9 @@ public class CodeMakerAction extends AnAction implements DumbAware {
                             new CreateFileAction(targetPath, content, codeTemplate.getFileEncoding(), anActionEvent.getDataContext()));
                 }
             }
-
-
-
-
-
-
-            /*String content = VelocityUtil.evaluate(codeTemplate.getCodeTemplate(), map);
-            //ClassEntry currentClass = selectClasses.get(0);
-            VirtualFile sourceRoot = findSourceRoot(currentClass, project, psiClass.getContainingFile());
-
-            if (sourceRoot != null) {
-                String sourcePath = sourceRoot.getPath() + "/" + currentClass.getPackageName().replace(".", "/");
-                String targetPath = CodeGenUtil.generateClassPath(sourcePath, className, "java");
-
-                VirtualFileManager manager = VirtualFileManager.getInstance();
-                VirtualFile virtualFile = manager
-                        .refreshAndFindFileByUrl(VfsUtil.pathToUrl(targetPath));
-
-                if (virtualFile == null || !virtualFile.exists()) {
-                    // async write action
-                    ApplicationManager.getApplication().runWriteAction(
-                            new CreateFileAction(targetPath, content, codeTemplate.getFileEncoding(), anActionEvent.getDataContext()));
-                }
-            }*/
-
         } catch (Exception e) {
             Messages.showMessageDialog(project, e.getMessage(), "Generate Failed", null);
         }
-        //List<ClassEntry> selectClasses = getClasses(project, codeTemplate.getClassNumber(), psiClass);
-
-//        if (selectClasses.size() < 1) {
-//            Messages.showMessageDialog(project, "No Classes found", "Generate Failed", null);
-//            return;
-//        }
-
-        // 获取Java类所在的Package
-       // PsiPackage psiPackage = JavaPsiFacade.getInstance(project).findPackage(classQualifiedName);
-
-        // 获取该包下的具体类
-       // PsiClass[] psiClasses = psiPackage.getClasses(GlobalSearchScope.projectScope(project));
-
-        // 通过获取到PsiElementFactory来创建相应的Element，包括字段，方法，注解，类，内部类等等
-//        PsiElementFactory elementFactory = JavaPsiFacade.getElementFactory(project);
-//        // 创建类
-//        PsiClass aClass = elementFactory.createClass(className);
-
-        // 通过给定名称（不包含具体路径）搜索对应文件, 传入3个参数 Project, FileName, GlobalSearchScope;
-        // GlobalSearchScope中有Project域，Moudule域，File域等等
-//        PsiFile[] psiFiles = FilenameIndex.getFilesByName(project, "People", GlobalSearchScope.projectScope(project));
-//
-//        if (psiFiles == null || psiFiles.length==0) {
-//            Messages.showMessageDialog(project, "找不到jar包该类文件", "Generate Failed", null);
-//            return ;
-//        }
-//        // 查找的类
-//        PsiFile choosePisFile = psiFiles[0];
-
-
-
-
-//        String filePath = project.getBasePath() + File.separator + "src" + File.separator + "com" + File.separator + "zcc" + File.separator + "entry" + File.separator;
-//
-//        VirtualFile virtualFi = LocalFileSystem.getInstance().findFileByPath(filePath);
-//        if(virtualFile == null) return ;
-//
-//        // 获取Psi文件
-//        PsiFile psiFi = PsiManager.getInstance(project).findFile(virtualFile);
-//
-//        //PsiClass psiChooseClass = psiFile.
-//        PsiElement[] psiElements = psiFile.getChildren();
-
     }
 
     /**
@@ -253,5 +204,12 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             return suitableRoots.get(0);
         }
         return null;
+    }
+
+    private CodeTemplate createCodeTemplate(String velocityTemplate,String sourceTemplateName, String classNameVm, int classNumber, String fileEncoding) throws IOException {
+        //String velocityTemplate = FileUtil.loadTextAndClose(CodeGenSettings.class.getResourceAsStream("/template/" + sourceTemplateName));
+        //String velocityTemplate = "Model.vm";
+        return new CodeTemplate(sourceTemplateName,
+                classNameVm, velocityTemplate, classNumber, fileEncoding);
     }
 }
