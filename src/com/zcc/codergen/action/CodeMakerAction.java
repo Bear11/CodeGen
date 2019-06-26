@@ -39,12 +39,16 @@ import java.util.Map;
 public class CodeMakerAction extends AnAction implements DumbAware {
 
     private static final Logger log = Logger.getInstance(CodeMakerAction.class);
+    //全限定类名
+    public static String calssPath = "";
     private CodeGenSettings settings;
 
     private String templateKey;
 
     public CodeMakerAction() {
     }
+
+
 
     CodeMakerAction(String templateKey) {
         this.settings = ServiceManager.getService(CodeGenSettings.class);
@@ -59,7 +63,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         if (project == null) {
             return;
         }
-
+        // 开启窗体
         JFrame jFrame= new JFrame("CodeGenFrame");
         JPanel rootPane=new CodeGenForm().getMainPane();
         //CodeGenForm dialog = new CodeGenForm();
@@ -69,7 +73,8 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         jFrame.setSize(600, 200);
         jFrame.setLocationRelativeTo(rootPane);//居中
         jFrame.setVisible(true);
-
+        CodeTemplate codeTemplate = settings.getCodeTemplate(templateKey);
+        System.out.println(calssPath);
 
         // 获取数据上下文
         //DataContext dataContext = anActionEvent.getDataContext();
@@ -108,7 +113,6 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         String suffix = "Dto";
         ClassEntry currentClass = ClassEntry.create(psiClass, pakagename, suffix);
 
-        CodeTemplate codeTemplate = settings.getCodeTemplate(templateKey);
         try {
             Map<String, Object> map = new HashMap<>();
             //map.put("class" , selectClasses.get(i));

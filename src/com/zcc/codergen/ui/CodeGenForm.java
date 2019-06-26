@@ -1,6 +1,7 @@
 package com.zcc.codergen.ui;
 
 import com.zcc.codergen.CodeGenSettings;
+import com.zcc.codergen.action.CodeMakerAction;
 
 import javax.swing.*;
 import java.awt.event.*;
@@ -49,8 +50,7 @@ public class CodeGenForm extends JDialog {
         // 初始化CodeGenSettings,初始化模型
         CodeGenSettings settings = new CodeGenSettings();
         settings.loadDefaultSettings();
-        String path = classPath.getText();
-
+        CodeMakerAction.calssPath = classPath.getText();
         dispose();
     }
 
