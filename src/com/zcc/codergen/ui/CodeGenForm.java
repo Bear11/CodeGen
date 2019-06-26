@@ -12,6 +12,9 @@ public class CodeGenForm extends JDialog {
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField classPath;
+    private JTextField prefixText;
+    private JTextField suffixText;
+    private JLabel frefix;
 
     public CodeGenForm() {
         setContentPane(contentPane);
@@ -48,10 +51,9 @@ public class CodeGenForm extends JDialog {
 
     private void onOK() {
         // add your code here
-        // 初始化CodeGenSettings,初始化模型
-        //CodeGenSettings settings = new CodeGenSettings();
-        //settings.loadDefaultSettings();
         CodeMakerAction.calssPath = classPath.getText();
+        CodeMakerAction.prefix = prefixText.getText();
+        CodeMakerAction.suffix = suffixText.getText();
         dispose();
     }
 
@@ -79,5 +81,9 @@ public class CodeGenForm extends JDialog {
 //    }
     public JPanel getMainPane() {
         return contentPane;
+    }
+
+    private void createUIComponents() {
+        // TODO: place custom component creation code here
     }
 }

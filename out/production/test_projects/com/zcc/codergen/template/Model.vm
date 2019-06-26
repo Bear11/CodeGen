@@ -73,6 +73,5 @@ void ##
 set#cap($field.Name)($field.type $field.name) {
    this.$field.name = $field.name;
 }
-
 #end
 }
