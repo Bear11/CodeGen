@@ -14,7 +14,6 @@ public class CodeGenForm extends JDialog {
     private JTextField classPath;
     private JTextField prefixText;
     private JTextField suffixText;
-    private JLabel frefix;
 
     public CodeGenForm() {
         setContentPane(contentPane);

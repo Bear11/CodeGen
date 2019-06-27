@@ -56,7 +56,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         try{
             CodeGenForm dialog = new CodeGenForm();
             dialog.pack();
-            dialog.setSize(600,250);
+            //dialog.setSize(600,250);
             JPanel rootPane = dialog.getMainPane();
             dialog.setLocationRelativeTo(rootPane);
             dialog.setVisible(true);
@@ -64,6 +64,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             e.printStackTrace();
             log.info("窗口打开失败");
             Messages.showMessageDialog(project, "Window open failed", "Generate Failed", null);
+            return;
         }
 
         // 获取数据上下文
@@ -102,6 +103,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             targetClassName = prefix+classSourceName+suffix;
         } else {
             Messages.showMessageDialog(project, "Please enter either prefix or suffix for the target class", "Generate Failed", null);
+            return;
         }
         // 生成目标类Entry
         ClassEntry currentClass = ClassEntry.create(psiClass, pakagename, suffix);
@@ -115,6 +117,8 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             codeTemplate = createCodeTemplate(velocityTemplate,"Model.vm",
                     targetClassName, 1, CodeTemplate.DEFAULT_ENCODING);
         } catch (IOException e) {
+            log.info("创建模板失败");
+            Messages.showMessageDialog(project, "create template failed", "Generate Failed", null);
             e.printStackTrace();
         }
 
@@ -147,7 +151,9 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             }
         } catch (Exception e) {
             Messages.showMessageDialog(project, e.getMessage(), "Generate Failed", null);
+            return;
         }
+        Messages.showMessageDialog("create target class success", "Generate Failed", null);
     }
 
     /**
