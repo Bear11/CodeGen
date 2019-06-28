@@ -10,23 +10,23 @@
 ##  $ClassName - generate by the config of "Class Name", the generated class name
 ##
 ## Class Entry Structure:
-##  $class0.className - the class Name
-##  $class0.packageName - the packageName
-##  $class0.importList - the list of imported classes name
-##  $class0.fields - the list of the class fields
+##  $class.className - the class Name
+##  $class.packageName - the packageName
+##  $class.importList - the list of imported classes name
+##  $class.fields - the list of the class fields
 ##          - type: the field type
 ##          - name: the field name
 ##          - modifier: the field modifier, like "private",or "@Setter private" if include annotations
-##  $class0.allFields - the list of the class fields include all fields of superclass
+##  $class.allFields - the list of the class fields include all fields of superclass
 ##          - type: the field type
 ##          - name: the field name
 ##          - modifier: the field modifier, like "private",or "@Setter private" if include annotations
-##  $class0.methods - the list of class methods
+##  $class.methods - the list of class methods
 ##          - name: the method name
 ##          - modifier: the method modifier, like "private static"
 ##          - returnType: the method returnType
 ##          - params: the method params, like "(String name)"
-##  $class0.allMethods - the list of class methods include all methods of superclass
+##  $class.allMethods - the list of class methods include all methods of superclass
 ##          - name: the method name
 ##          - modifier: the method modifier, like "private static"
 ##          - returnType: the method returnType

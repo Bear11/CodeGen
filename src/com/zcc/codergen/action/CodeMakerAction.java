@@ -153,7 +153,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             Messages.showMessageDialog(project, e.getMessage(), "Generate Failed", null);
             return;
         }
-        Messages.showMessageDialog("create target class success", "Generate Failed", null);
+        Messages.showMessageDialog("create target class success", "Generate Success", null);
     }
 
     /**
