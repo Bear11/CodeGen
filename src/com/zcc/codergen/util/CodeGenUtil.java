@@ -3,8 +3,11 @@ package com.zcc.codergen.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.intellij.lang.jvm.JvmModifier;
+import com.intellij.psi.*;
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.Lists;
@@ -13,16 +16,6 @@ import com.intellij.ide.util.TreeClassChooserFactory;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiField;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiImportList;
-import com.intellij.psi.PsiImportStatement;
-import com.intellij.psi.PsiJavaFile;
-import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.javadoc.PsiDocComment;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -76,7 +69,10 @@ public class CodeGenUtil {
 
 
     public static List<ClassEntry.Field> getFields(PsiClass psiClass) {
-        return Arrays.stream(psiClass.getFields())
+        return Arrays.stream( psiClass.getFields())
+            .filter(x->x.getModifierList()!=null
+                    && !x.getModifierList().hasModifierProperty(JvmModifier.STATIC.name().toLowerCase())
+                    && !x.getModifierList().hasModifierProperty(JvmModifier.FINAL.name().toLowerCase()))
             .map(psiField -> new ClassEntry.Field(psiField.getType().getPresentableText(),
                 psiField.getName(),
                 psiField.getModifierList() == null ? "" : psiField.getModifierList().getText(),

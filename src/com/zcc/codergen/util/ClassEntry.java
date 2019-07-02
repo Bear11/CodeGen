@@ -251,12 +251,11 @@ public class ClassEntry {
         {
             classEntry.setFields(CodeGenUtil.getFields(psiClass));
             classEntry.setImportList(CodeGenUtil.getImportList((PsiJavaFile) psiFile));
-            classEntry.setAllFields(CodeGenUtil.getAllFields(psiClass));
+            //classEntry.setAllFields(CodeGenUtil.getAllFields(psiClass));
         }
-
-        classEntry.setMethods(CodeGenUtil.getMethods(psiClass));
-        classEntry.setAllMethods(CodeGenUtil.getAllMethods(psiClass));
-        classEntry.setTypeParams(CodeGenUtil.getClassTypeParameters(psiClass));
+//        classEntry.setMethods(CodeGenUtil.getMethods(psiClass));
+//        classEntry.setAllMethods(CodeGenUtil.getAllMethods(psiClass));
+//        classEntry.setTypeParams(CodeGenUtil.getClassTypeParameters(psiClass));
         return classEntry;
     }
 

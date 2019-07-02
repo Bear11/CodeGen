@@ -2,6 +2,7 @@ package com.zcc.codergen.action;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.LangDataKeys;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.DumbAware;
@@ -14,6 +15,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.refactoring.PackageWrapper;
 import com.intellij.refactoring.move.moveClassesOrPackages.MoveClassesOrPackagesUtil;
@@ -43,6 +45,9 @@ public class CodeMakerAction extends AnAction implements DumbAware {
     public static String prefix = "";
     // 后缀
     public static String suffix = "";
+    // 目标包路径
+    private static String targetPkg = "";
+
     public CodeMakerAction() {
     }
 
@@ -56,9 +61,9 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         try{
             CodeGenForm dialog = new CodeGenForm();
             dialog.pack();
-            //dialog.setSize(600,250);
             JPanel rootPane = dialog.getMainPane();
             dialog.setLocationRelativeTo(rootPane);
+            dialog.setSize(600,240);
             dialog.setVisible(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,7 +71,6 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             Messages.showMessageDialog(project, "Window open failed", "Generate Failed", null);
             return;
         }
-
         // 获取数据上下文
         //DataContext dataContext = anActionEvent.getDataContext();
 
@@ -78,14 +82,17 @@ public class CodeMakerAction extends AnAction implements DumbAware {
 
         // 项目路径
         String basePath = project.getBasePath();
-
         String url = anActionEvent.getPlace();
-        // 获得的全限定类名
-        String classQualifiedName = "com.zcc.entry.Student";
+        String eventPlace = anActionEvent.getPlace();
+        //anActionEvent.get
+        // 检查用户输入是否非法
+        if (!check(anActionEvent)) {
+            return;
+        }
         // 实际短类名
-        String classSourceName = getRealClassName(classQualifiedName);
+        String classSourceName = getRealClassName(calssPath);
         // 根据类的全限定名查询PsiClass，下面这个方法是查询Project域
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(classQualifiedName, GlobalSearchScope.projectScope(project));
+        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(calssPath, GlobalSearchScope.projectScope(project));
 
         if (psiClass == null) {
             Messages.showMessageDialog(project, "No Classes found", "Generate Failed", null);
@@ -94,9 +101,9 @@ public class CodeMakerAction extends AnAction implements DumbAware {
         // 获取Java类所在的Package
         PsiJavaFile javaFile = (PsiJavaFile) psiClass.getContainingFile();
         PsiPackage psiPackage = JavaPsiFacade.getInstance(project).findPackage(javaFile.getPackageName());
-        // TODO 目标类生成文件夹对应包名，后面需修改
+        /*// TODO 目标类生成文件夹对应包名，后面需修改
         String pakagename = "com.zcc.entry";
-        String pakagePath = pakagename.replace(".","/");
+        String pakagePath = pakagename.replace(".","/");*/
         // 目标类名
         String targetClassName = "";
         if (StringUtil.isNotEmpty(prefix)||StringUtil.isNotEmpty(suffix)) {
@@ -106,7 +113,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             return;
         }
         // 生成目标类Entry
-        ClassEntry currentClass = ClassEntry.create(psiClass, pakagename, suffix);
+        ClassEntry currentClass = ClassEntry.create(psiClass, targetPkg, suffix);
         VirtualFile sourceRoot = findSourceRoot(currentClass, project, psiClass.getContainingFile());
         CodeTemplate codeTemplate = null;
         try {
@@ -206,5 +213,29 @@ public class CodeMakerAction extends AnAction implements DumbAware {
     private CodeTemplate createCodeTemplate(String velocityTemplate,String sourceTemplateName, String classNameVm, int classNumber, String fileEncoding) throws IOException {
         return new CodeTemplate(sourceTemplateName,
                 classNameVm, velocityTemplate, classNumber, fileEncoding);
+    }
+
+    /**
+     * 检验用户输入是否合法
+     * @param anActionEvent
+     * @return
+     */
+    private boolean check(AnActionEvent anActionEvent) {
+        Project project = anActionEvent.getProject();
+        if (StringUtil.isEmpty(calssPath)) {
+            Messages.showMessageDialog(project, "Please enter the class path.", "Generate Failed", null);
+            return false;
+        }
+        if (StringUtil.isEmpty(prefix) && StringUtil.isEmpty(suffix)) {
+            Messages.showMessageDialog(project, "Please enter either prefix or suffix for the target class", "Generate Failed", null);
+            return false;
+        }
+        PsiFile psiFile = anActionEvent.getData(LangDataKeys.PSI_FILE);
+        targetPkg = ((PsiJavaFileImpl) psiFile).getPackageName();
+        if (StringUtil.isEmpty(targetPkg)) {
+            Messages.showMessageDialog(project, "Please choose a target package.", "Generate Failed", null);
+            return false;
+        }
+        return true;
     }
 }
