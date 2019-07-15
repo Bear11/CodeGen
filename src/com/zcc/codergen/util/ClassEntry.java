@@ -241,10 +241,10 @@ public class ClassEntry {
      * @param filePath
      * @return
      */
-    public static ClassEntry create(PsiClass psiClass, String filePath, String suffix) {
+    public static ClassEntry create(PsiClass psiClass, String filePath, String prefix, String suffix) {
         PsiFile psiFile = psiClass.getContainingFile();
         ClassEntry classEntry = new ClassEntry();
-        classEntry.setClassName(psiClass.getName()+suffix);
+        classEntry.setClassName(prefix+psiClass.getName()+suffix);
         classEntry.setPackageName(((PsiClassOwner)psiFile).getPackageName());
         classEntry.setPackageName(filePath);
         if(psiFile instanceof PsiJavaFile)

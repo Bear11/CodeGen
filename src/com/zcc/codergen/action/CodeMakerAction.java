@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.*;
+import com.intellij.psi.impl.compiled.ClsFileImpl;
 import com.intellij.psi.impl.source.PsiJavaFileImpl;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.refactoring.PackageWrapper;
@@ -40,13 +41,13 @@ public class CodeMakerAction extends AnAction implements DumbAware {
 
     private static final Logger log = Logger.getInstance(CodeMakerAction.class);
     // 全限定类名
-    public static String calssPath = "";
+    public static String targetPath = "";
     // 前缀
     public static String prefix = "";
     // 后缀
     public static String suffix = "";
-    // 目标包路径
-    private static String targetPkg = "";
+
+    public static boolean cancelStatus = false;
 
     public CodeMakerAction() {
     }
@@ -71,49 +72,36 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             Messages.showMessageDialog(project, "Window open failed", "Generate Failed", null);
             return;
         }
-        // 获取数据上下文
-        //DataContext dataContext = anActionEvent.getDataContext();
-
-        // 获取到数据上下文后，通过CommonDataKeys对象可以获得该File的所有信息
-        //PsiFile psiFile = CommonDataKeys.PSI_FILE.getData(dataContext);
-        // 操作的文件路径
-        //VirtualFile virtualFile = CommonDataKeys.VIRTUAL_FILE.getData(dataContext);
-        //String ss = virtualFile.getName();
-
+        if (cancelStatus) { // 取消
+            return;
+        }
         // 项目路径
         String basePath = project.getBasePath();
-        String url = anActionEvent.getPlace();
-        String eventPlace = anActionEvent.getPlace();
-        //anActionEvent.get
         // 检查用户输入是否非法
         if (!check(anActionEvent)) {
             return;
         }
-        // 实际短类名
-        String classSourceName = getRealClassName(calssPath);
         // 根据类的全限定名查询PsiClass，下面这个方法是查询Project域
-        PsiClass psiClass = JavaPsiFacade.getInstance(project).findClass(calssPath, GlobalSearchScope.projectScope(project));
+        PsiFile psiFile = anActionEvent.getData(LangDataKeys.PSI_FILE);
+        PsiClass psiClass = ((ClsFileImpl) psiFile).getClasses()[0];
 
         if (psiClass == null) {
             Messages.showMessageDialog(project, "No Classes found", "Generate Failed", null);
             return;
         }
-        // 获取Java类所在的Package
-        PsiJavaFile javaFile = (PsiJavaFile) psiClass.getContainingFile();
-        PsiPackage psiPackage = JavaPsiFacade.getInstance(project).findPackage(javaFile.getPackageName());
-        /*// TODO 目标类生成文件夹对应包名，后面需修改
-        String pakagename = "com.zcc.entry";
-        String pakagePath = pakagename.replace(".","/");*/
+        String packageName = ((ClsFileImpl) psiFile).getPackageName();
+
         // 目标类名
         String targetClassName = "";
         if (StringUtil.isNotEmpty(prefix)||StringUtil.isNotEmpty(suffix)) {
-            targetClassName = prefix+classSourceName+suffix;
+            targetClassName = prefix+psiClass.getName()+suffix;
         } else {
             Messages.showMessageDialog(project, "Please enter either prefix or suffix for the target class", "Generate Failed", null);
             return;
         }
+       // generate(String );
         // 生成目标类Entry
-        ClassEntry currentClass = ClassEntry.create(psiClass, targetPkg, suffix);
+        ClassEntry currentClass = ClassEntry.create(psiClass, targetPath, prefix, suffix);
         VirtualFile sourceRoot = findSourceRoot(currentClass, project, psiClass.getContainingFile());
         CodeTemplate codeTemplate = null;
         try {
@@ -128,7 +116,6 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             Messages.showMessageDialog(project, "create template failed", "Generate Failed", null);
             e.printStackTrace();
         }
-
         try {
             Map<String, Object> map = new HashMap<>();
             Date now = new Date();
@@ -161,6 +148,11 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             return;
         }
         Messages.showMessageDialog("create target class success", "Generate Success", null);
+    }
+
+    public void generate(String targetPath, String targetClassName) {
+
+
     }
 
     /**
@@ -222,7 +214,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
      */
     private boolean check(AnActionEvent anActionEvent) {
         Project project = anActionEvent.getProject();
-        if (StringUtil.isEmpty(calssPath)) {
+        if (StringUtil.isEmpty(targetPath)) {
             Messages.showMessageDialog(project, "Please enter the class path.", "Generate Failed", null);
             return false;
         }
@@ -231,8 +223,7 @@ public class CodeMakerAction extends AnAction implements DumbAware {
             return false;
         }
         PsiFile psiFile = anActionEvent.getData(LangDataKeys.PSI_FILE);
-        targetPkg = ((PsiJavaFileImpl) psiFile).getPackageName();
-        if (StringUtil.isEmpty(targetPkg)) {
+        if (psiFile == null) {
             Messages.showMessageDialog(project, "Please choose a target package.", "Generate Failed", null);
             return false;
         }

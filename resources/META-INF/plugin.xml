@@ -32,7 +32,7 @@
   <actions>
     <group id="com.zcc.apitodto.action.CodeMakerMenu" text="Sample Menu" description="Sample menu">
       <add-to-group group-id="MainMenu" anchor="last"/>
-      <action id="com.zcc.apitodto.action.CodeMakerAction" class="com.zcc.codergen.action.CodeMakerAction" text="APi-To-Dto" description="api to dto" />
+      <action id="com.zcc.apitodto.action.CodeMakerAction" class="com.zcc.codergen.action.CodeGenAction" text="APi-To-Dto" description="api to dto" />
     </group>
   </actions>
   <!-- 配置应用包以及应用包的实现类-->

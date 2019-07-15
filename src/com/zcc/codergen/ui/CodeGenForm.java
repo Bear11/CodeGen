@@ -1,5 +1,6 @@
 package com.zcc.codergen.ui;
 
+import com.zcc.codergen.action.CodeGenAction;
 import com.zcc.codergen.action.CodeMakerAction;
 
 import javax.swing.*;
@@ -48,14 +49,15 @@ public class CodeGenForm extends JDialog {
 
     private void onOK() {
         // add your code here
-        CodeMakerAction.calssPath = classPath.getText();
-        CodeMakerAction.prefix = prefixText.getText();
-        CodeMakerAction.suffix = suffixText.getText();
+        CodeGenAction.targetPath = classPath.getText();
+        CodeGenAction.prefix = prefixText.getText();
+        CodeGenAction.suffix = suffixText.getText();
         dispose();
     }
 
     private void onCancel() {
         // add your code here if necessary
+        CodeGenAction.cancelStatus = true;
         dispose();
     }
 

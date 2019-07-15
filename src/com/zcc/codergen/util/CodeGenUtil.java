@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
-import org.jetbrains.annotations.NotNull;
+//import org.apache.oro.text.regex.*;
 
 import com.google.common.collect.Lists;
 import com.intellij.ide.util.TreeClassChooser;
@@ -69,15 +71,18 @@ public class CodeGenUtil {
 
 
     public static List<ClassEntry.Field> getFields(PsiClass psiClass) {
-        return Arrays.stream( psiClass.getFields())
+        List<ClassEntry.Field> list =  Arrays.stream( psiClass.getFields())
             .filter(x->x.getModifierList()!=null
                     && !x.getModifierList().hasModifierProperty(JvmModifier.STATIC.name().toLowerCase())
-                    && !x.getModifierList().hasModifierProperty(JvmModifier.FINAL.name().toLowerCase()))
+                    && !x.getModifierList().hasModifierProperty(JvmModifier.FINAL.name().toLowerCase())
+                    && !"head".equalsIgnoreCase(x.getName()))
             .map(psiField -> new ClassEntry.Field(psiField.getType().getPresentableText(),
                 psiField.getName(),
-                psiField.getModifierList() == null ? "" : psiField.getModifierList().getText(),
-                getDocCommentText(psiField)))
+                psiField.getModifierList() == null ? "" : filterModifierList(psiField),
+                //psiField.getModifierList() == null ? "" : psiField.getModifierList().getText(),
+                getDocComment(psiField)))
             .collect(Collectors.toList());
+        return list;
     }
 
     public static String getDocCommentText(PsiField psiField) {
@@ -228,4 +233,68 @@ public class CodeGenUtil {
             LOGGER.error("reformat code failed", e);
         }
     }
+
+    /**
+     * 过滤类名
+     * @param psiField
+     * @return
+     */
+    public static String filterFiledName(PsiField psiField) {
+        boolean isCustomClass = false;
+        if (psiField != null) {
+            isCustomClass = isJavaClass(psiField.getContainingClass().getClass());
+        }
+        if (!isCustomClass) {
+            assert psiField != null;
+            return Objects.requireNonNull(psiField.getName()).concat("Dto");
+        }
+        return psiField.getName();
+    }
+    public static String filterModifierList(PsiField psiField) {
+        boolean bol = psiField.getModifierList().hasExplicitModifier("private");
+        if (bol) {
+            return JvmModifier.PRIVATE.name().toLowerCase();
+        }
+        bol = psiField.getModifierList().hasExplicitModifier("public");
+        if (bol) {
+            return JvmModifier.PUBLIC.name().toLowerCase();
+        }
+        bol = psiField.getModifierList().hasExplicitModifier("protected");
+        if (bol) {
+            return JvmModifier.PROTECTED.name().toLowerCase();
+        }
+        return JvmModifier.PRIVATE.name().toLowerCase();
+    }
+
+    public static String getDocComment(PsiField psiField) {
+        String doc = "";
+        String modifyTest = Objects.requireNonNull(psiField.getModifierList()).getText();
+        int n = KmpUtil.search("@FieldDoc",modifyTest);
+        if (n<0) {
+            n = 0;
+        }
+        modifyTest = modifyTest.substring(n);
+        // 从内容上截取路径数组
+        Pattern pattern = Pattern.compile("(?<=\\()[^\\)]+");
+        Matcher matcher = pattern.matcher(modifyTest);
+        if(matcher.find()){
+            modifyTest = matcher.group(0);
+        }
+        if (modifyTest.length()>0) {
+            modifyTest = modifyTest.substring(1,modifyTest.length()-1);
+        }
+        return modifyTest;
+    }
+
+    /**
+     * 判断一个类是JAVA类型还是用户自定义类型
+     * @param clz
+     * @return
+     */
+    public static boolean isJavaClass(Class<?> clz) {
+        return clz != null && clz.getClassLoader() == null;
+    }
+
+
+
 }

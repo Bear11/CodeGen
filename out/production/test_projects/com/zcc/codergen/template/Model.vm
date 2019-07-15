@@ -43,15 +43,17 @@ import $importer;
  * create by $USER in $TIME
  */
 public class $ClassName {
-
 #foreach($field in $class.Fields)
+    /**
+     * $field.comment
+     */
     $field.modifier $field.Type $field.Name;
 #end
- /**
-  * getter and setter functions
-  */
+    /**
+     * getter and setter functions
+     */
 #foreach($field in $class.Fields)
-  public ##
+    public ##
 #if($field.modifierStatic)
 static ##
 #end
@@ -65,7 +67,7 @@ get##
 #cap($field.Name)() {
   return $field.name;
 }
-  public ##
+    public ##
 #if($field.modifierStatic)
 static ##
 #end
